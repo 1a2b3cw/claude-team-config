@@ -15,7 +15,7 @@ if [ -z "$content" ]; then
 fi
 
 # 跳过非代码文件
-if echo "$file_path" | grep -qE '\.(md|txt|json|yaml|yml|toml|env|gitignore|dockerignore)$'; then
+if echo "$file_path" | grep -qE '\.(md|txt|json|yaml|yml|toml|env|gitignore|dockerignore|sh|bash|zsh)$'; then
   exit 0
 fi
 

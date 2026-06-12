@@ -1,6 +1,6 @@
 ---
-name: database-optimization
-description: Query optimization, indexing strategies, and database performance tuning for PostgreSQL and MySQL
+name: database
+description: 查询优化、索引策略和数据库性能调优，覆盖 PostgreSQL 和 MySQL
 ---
 
 # Database Optimization
@@ -64,25 +64,20 @@ CREATE INDEX idx_users_email_name ON users (email, name);
 
 Symptom: 1 query to fetch parent + N queries for each child.
 
-```python
-# BAD: N+1
-users = db.query(User).all()
-for user in users:
-    print(user.orders)  # triggers query per user
-
-# GOOD: eager load
-users = db.query(User).options(joinedload(User.orders)).all()
-```
-
-```javascript
+```typescript
 // BAD: N+1
-const users = await User.findAll();
+const users = await db.select().from(users);
 for (const user of users) {
-  const orders = await Order.findAll({ where: { userId: user.id } });
+  const orders = await db.select().from(orders).where(eq(orders.userId, user.id));
 }
 
-// GOOD: batch load
-const users = await User.findAll({ include: [Order] });
+// GOOD: eager load (Prisma)
+const users = await prisma.user.findMany({ include: { orders: true } });
+
+// GOOD: join query (Drizzle)
+const users = await db.query.users.findMany({
+  with: { orders: true },
+});
 ```
 
 Detection: enable query logging, count queries per request. More than 10 queries for a single endpoint is a red flag.
@@ -112,13 +107,15 @@ MySQL:
 - Never read-after-write from a replica; use primary for consistency-critical reads
 - Use connection-level routing, not query-level
 
-```python
-# SQLAlchemy read replica routing
-class RoutingSession(Session):
-    def get_bind(self, mapper=None, clause=None):
-        if self._flushing or self.is_modified():
-            return engines["primary"]
-        return engines["replica"]
+```typescript
+// Read replica routing (Kysely)
+function getDatabase(write: boolean) {
+  return write ? primaryDb : replicaDb;
+}
+
+// Usage
+const users = await getDatabase(false).selectFrom('users').selectAll().execute();
+await getDatabase(true).insertInto('users').values({ name: 'Alice' }).execute();
 ```
 
 ## Partition Strategies

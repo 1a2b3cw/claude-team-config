@@ -23,24 +23,14 @@
 
 基于 Claude Code 的 AI 协作开发团队配置，专为 Web 全栈开发设计。
 
-- **5 个 Agent**：Architect-Planner、Builder、Reviewer、Researcher、DevOps
-- **13 个 Skill**：前端、后端、测试、安全、性能、UI 设计、TypeScript 进阶等
+- **6 个 Agent**：Architect-Planner、Builder、Designer、Reviewer、Researcher、DevOps
+- **14 个 Skill**：前端、后端、测试、安全、性能、UI 设计、UI 原型、TypeScript 进阶等
 - **5 个 MCP 服务器**：GitHub、Playwright、Context7、SQLite、PostgreSQL
 - **4 个 Slash Command**：`/dev`、`/review-all`、`/ship`、`/standup`
-- **5 个 Rules**：TypeScript、React、Node.js、测试、Git
-- **3 个 Hook**：代码安全检查、Bash 命令检查、任务追踪
+- **6 个 Rules**：TypeScript、React、Node.js、测试、Git、设计
+- **2 个 Hook**：代码安全检查（Write/Edit 时）、Bash 命令检查（执行命令时）
 
-### v2.0 核心变化
-
-| 变化 | v1.x | v2.0 |
-|------|------|------|
-| 工作流 | 串行瀑布流 | 并行迭代模型 |
-| 任务分级 | 一刀切全流程 | S/M/L/XL 四级按需 |
-| Agent 数量 | 7 个（职责分散） | 5 个（合并精简） |
-| Skill 数量 | 18 个（重叠多） | 13 个（合并精简） |
-| 安全检查 | 仅 Write/Edit | + Bash 命令检查 |
-| MCP 服务器 | 6 个 | 5 个（去重 Puppeteer） |
-| 无障碍 | 无 | 审查维度 + 规则 |
+> v2.0 变化详见 [CHANGELOG.md](CHANGELOG.md)。
 
 ---
 
@@ -137,38 +127,26 @@ claude
 
 ## 在其他项目中使用
 
-本团队配置可以复用到任意项目中，有 3 种方式：
+本团队配置可以复用到任意项目中，有 2 种方式：
 
-### 方式 1：安装脚本（推荐）
-
-最简单的一键部署方式，适合个人使用。
-
-#### Windows
-
-```cmd
-:: 在任意项目目录下运行
-D:\CD\MY1\install.bat D:\你的新项目
-```
-
-#### Linux / Mac
+### 方式 1：手动复制（推荐）
 
 ```bash
-# 在任意项目目录下运行
-bash /path/to/MY1/install.sh /path/to/your/project
-
-# 或在当前目录
-cd /path/to/your/project
-bash /path/to/MY1/install.sh .
+# 复制整个 .claude 目录和 .gitignore
+cp -r D:\CD\MY1\.claude D:\你的新项目\.claude
+cp D:\CD\MY1\.gitignore D:\你的新项目\.gitignore
+mkdir -p D:\你的新项目\data
 ```
 
-#### 安装脚本会做什么
+Windows PowerShell：
 
-1. 复制 `.claude/` 目录到目标项目
-2. 复制 `.gitignore`（如果目标没有）
-3. 创建 `data/` 目录（用于 SQLite）
-4. 设置脚本执行权限
+```powershell
+Copy-Item -Recurse D:\CD\MY1\.claude D:\你的新项目\.claude
+Copy-Item D:\CD\MY1\.gitignore D:\你的新项目\.gitignore
+New-Item -ItemType Directory -Path D:\你的新项目\data -Force
+```
 
-#### 安装后目录结构
+安装后目录结构：
 
 ```
 你的新项目/
@@ -186,95 +164,40 @@ bash /path/to/MY1/install.sh .
 └── src/                  # 你的项目代码
 ```
 
-### 方式 2：手动复制
-
-适合快速尝试或不需要脚本的场景。
-
-```bash
-# 复制整个 .claude 目录
-cp -r D:\CD\MY1\.claude D:\你的新项目\.claude
-
-# 复制 .gitignore
-cp D:\CD\MY1\.gitignore D:\你的新项目\.gitignore
-
-# 创建数据目录
-mkdir -p D:\你的新项目\data
-```
-
-#### Windows PowerShell
-
-```powershell
-# 复制整个 .claude 目录
-Copy-Item -Recurse D:\CD\MY1\.claude D:\你的新项目\.claude
-
-# 复制 .gitignore
-Copy-Item D:\CD\MY1\.gitignore D:\你的新项目\.gitignore
-
-# 创建数据目录
-New-Item -ItemType Directory -Path D:\你的新项目\data -Force
-```
-
-### 方式 3：Git 子模块（适合团队协作）
+### 方式 2：Git 子模块（适合团队协作）
 
 把团队配置做成独立仓库，各项目通过 submodule 引用，统一更新。
 
-#### 第一步：创建团队配置仓库
-
 ```bash
+# 第一步：创建团队配置仓库
 cd D:\CD\MY1
-git add .claude/ .gitignore USAGE.md install.sh install.bat
+git add .claude/ .gitignore USAGE.md
 git commit -m "feat: AI team config v2.0"
 git remote add origin https://github.com/你的用户名/claude-team-config.git
 git push -u origin main
-```
 
-#### 第二步：在新项目中引用
-
-```bash
+# 第二步：在新项目中引用
 cd D:\你的新项目
-
-# 添加为子模块
 git submodule add https://github.com/你的用户名/claude-team-config.git .claude-team
 
 # 软链接到 .claude
 # Windows (管理员 PowerShell)
 New-Item -ItemType Junction -Path ".claude" -Target ".claude-team\.claude"
-
 # Linux / Mac
 ln -s .claude-team/.claude .claude
-```
 
-#### 第三步：更新团队配置
-
-```bash
-# 在任意使用了子模块的项目中
-cd D:\你的新项目
+# 更新团队配置
 git submodule update --remote
-
-# 重新创建软链接（如果需要）
 ```
 
-#### 克隆含子模块的项目
+### 两种方式对比
 
-```bash
-# 方式 A：克隆时自动拉取子模块
-git clone --recurse-submodules https://github.com/你/你的项目.git
-
-# 方式 B：克隆后手动拉取
-git clone https://github.com/你/你的项目.git
-cd 你的项目
-git submodule update --init
-```
-
-### 三种方式对比
-
-| 维度 | 安装脚本 | 手动复制 | Git 子模块 |
-|------|----------|----------|------------|
-| **难度** | 简单 | 最简单 | 中等 |
-| **更新方式** | 重新运行脚本 | 手动覆盖 | `git submodule update` |
-| **版本管理** | 无 | 无 | 有（独立版本库） |
-| **团队协作** | 不适合 | 不适合 | 最适合 |
-| **自定义** | 修改后需重新安装 | 修改后需重新复制 | fork 后各自维护 |
+| 维度 | 手动复制 | Git 子模块 |
+|------|----------|------------|
+| **难度** | 最简单 | 中等 |
+| **更新方式** | 手动覆盖 | `git submodule update` |
+| **版本管理** | 无 | 有（独立版本库） |
+| **团队协作** | 不适合 | 最适合 |
 
 ### 针对不同项目类型的调整
 
@@ -348,74 +271,11 @@ rm -rf .claude/skills/microservices-design  # 不需要微服务
 | **SQLite** | stdio | 本地数据库开发 | 需要 uvx |
 | **PostgreSQL** | stdio | 生产级数据库 | 需要 PG 服务 |
 
-### GitHub MCP 使用示例
-
-```
-# 查看仓库信息
-帮我查看这个仓库的最近 PR
-
-# 创建 Issue
-创建一个 Issue：标题是"修复登录页面样式问题"，标签是 bug
-
-# 搜索代码
-在仓库中搜索所有包含 "useState" 的文件
-```
-
-### Context7 MCP 使用示例
-
-```
-# 查询库文档
-查一下 Next.js 14 的 App Router 怎么用
-
-# 查询 API
-React 18 的 useDeferredValue 怎么用？
-
-# 对比方案
-Prisma 和 Drizzle 哪个更适合这个项目？
-```
-
-### Playwright MCP 使用示例
-
-```
-# 打开页面
-打开 http://localhost:3000 并截图
-
-# 测试交互
-点击登录按钮，输入用户名和密码，验证是否跳转到首页
-
-# 自动化测试
-帮我写一个 E2E 测试：用户注册流程
-```
-
-### SQLite MCP 使用示例
-
-```
-# 创建表
-创建一个 users 表，包含 id、name、email、created_at
-
-# 插入数据
-往 users 表插入一条测试数据
-
-# 查询数据
-查询所有邮箱包含 @example.com 的用户
-```
-
-### PostgreSQL MCP 使用示例
-
-```
-# 查看表结构
-显示 users 表的结构
-
-# 执行查询
-查询最近 7 天注册的用户数量
-
-# 优化查询
-分析这条 SQL 的执行计划：SELECT * FROM orders WHERE user_id = 123
-```
+> 各 MCP 的使用示例和场景说明见 [BEST-PRACTICES.md](BEST-PRACTICES.md#mcp-工具什么时候用什么)。
 
 ---
 
-## Agent 团队（v2.0 精简为 5 个）
+## Agent 团队（v2.0 精简为 6 个）
 
 ### 角色分工
 
@@ -430,10 +290,10 @@ Prisma 和 Drizzle 哪个更适合这个项目？
 └─────────────────┬───────────────────────────────┘
                   ↓
 ┌─────────────────────────────────────────────────┐
-│  Builder（工程师）                                │
-│  - TDD 开发 + 编码实现 + 单元测试                  │
-│  - M 级任务可自行审查                              │
-│  - 参与：所有任务                                  │
+│  Builder（工程师）+ Designer（设计师）              │
+│  - Builder：TDD 开发 + 编码实现 + 单元测试         │
+│  - Designer：设计方向 + 原型产出 + 视觉审查         │
+│  - 参与：所有任务（Designer 仅涉及 UI 时）         │
 └─────────────────┬───────────────────────────────┘
                   ↓
 ┌─────────────────────────────────────────────────┐
@@ -465,6 +325,12 @@ Prisma 和 Drizzle 哪个更适合这个项目？
 - **规则**：遵循 TDD 流程，小步提交，aria 无障碍标签
 - **v2.0 变化**：M 级任务可自行完成轻量审查
 
+#### Designer（设计师）
+- **职责**：UI 设计方向、HTML 原型产出、视觉审查、设计系统维护
+- **产出**：设计方向（spec.md 中）、`preview/` 原型、设计审查报告
+- **参与时机**：L/XL 级涉及 UI 时确定设计方向；Builder 完成 UI 后审查视觉效果
+- **v2.0 变化**：从原 Architect 中拆出 UI 设计职责，独立为专职设计师
+
 #### Reviewer（审查员）
 - **职责**：代码质量 + 安全 + 性能 + 无障碍 全维度审查
 - **6 个维度**：正确性、安全性、性能、可维护性、测试覆盖、无障碍
@@ -484,7 +350,7 @@ Prisma 和 Drizzle 哪个更适合这个项目？
 
 ---
 
-## Skill 技能（v2.0 精简为 13 个）
+## Skill 技能（v2.0 精简为 14 个）
 
 ### 项目管理类
 
@@ -510,6 +376,7 @@ Prisma 和 Drizzle 哪个更适合这个项目？
 | **testing** | 写测试、制定测试计划 | TDD 循环、AAA 模式、测试金字塔、Vitest、Testcontainers、契约测试、属性测试（合并了原 tdd + testing-strategies） |
 | **performance** | 性能问题、上线前 | LCP/FID/CLS、N+1 查询、缓存策略、代码分割、图片优化 |
 | **ui-design** | 前端界面设计 | 字体排版、配色系统、空间构成、动效设计、暗色模式、拒绝 AI 廉价感 |
+| **ui-prototype** | 画原型、选风格 | 4 种预设风格（Apple 简约/深色渐变/新拟物/极简线框）、静态 HTML 原型产出、设计契约 |
 
 ### 工程化类
 
@@ -518,15 +385,7 @@ Prisma 和 Drizzle 哪个更适合这个项目？
 | **ci-cd-pipelines** | 配置 CI/CD | GitHub Actions、Docker 构建、自动化测试、部署策略、Changesets |
 | **microservices-design** | 分布式系统设计 | 服务拆分、通信模式、数据一致性、可观测性 |
 
-### v2.0 Skill 变化
-
-| 变化 | v1.x（18 个） | v2.0（13 个） |
-|------|---------------|---------------|
-| 合并 | frontend + react-patterns + nextjs-mastery | → **frontend** |
-| 合并 | code-review + security-review | → **code-review** |
-| 合并 | tdd + testing-strategies | → **testing** |
-| 合并 | api-design + authentication-patterns | → **api-design** |
-| 保留 | project-planning, architecture, database, debugging, performance, ui-design, ci-cd-pipelines, microservices-design, typescript-advanced | 保留（typescript-advanced 内容过深，保持独立 skill） |
+> Skill 合并历史见 [CHANGELOG.md](CHANGELOG.md#v2002026-06-07)。
 
 ---
 
@@ -699,71 +558,16 @@ Prisma 和 Drizzle 哪个更适合这个项目？
 
 ---
 
-## 典型工作流（v2.0 按复杂度分级）
+## 典型工作流
 
-### 场景 1：S 级热修（1-10 行）
+| 复杂度 | 流程 | 示例 |
+|--------|------|------|
+| **S 级** | 直接修 → 测试 → Ship | 修 typo、改配置 |
+| **M 级** | 快速规划 → 构建+审查 → Ship | 加搜索框、加 API 端点 |
+| **L 级** | 规划 → 多轮迭代（构建+审查） → Ship | 用户认证、文件上传 |
+| **XL 级** | 调研 → 架构 → 多轮迭代 → 集成验证 → Ship | 重构支付系统 |
 
-```
-用户：首页标题有个错别字
-
-Builder 直接修复 → 测试 → Ship
-无需规划，无需审查
-```
-
-### 场景 2：M 级小功能（单模块）
-
-```
-用户：给用户列表加一个搜索框
-
-1. Builder 实现 + 自行审查
-2. Reviewer 快速审查（含安全+无障碍）
-3. 测试通过 → Ship
-```
-
-### 场景 3：L 级中功能（跨模块）
-
-```
-用户：做一个用户注册登录功能，用 Next.js + Prisma + PostgreSQL
-
-1. Architect-Planner 输出 spec.md + tasks.md
-2. 用户确认后进入迭代：
-   - 迭代 1：注册 API + 表单（Builder 构建 + Reviewer 并行审查）
-   - 迭代 2：登录 + JWT（Builder 构建 + Reviewer 并行审查）
-3. /ship 发布检查 → 部署
-```
-
-### 场景 4：XL 级大功能（新系统）
-
-```
-用户：重构整个支付系统
-
-Phase 0: Researcher + Architect 并行调研（Spike）
-Phase 1: Architect-Planner 输出 spec.md + architecture.md + ADR
-Phase 2: 多轮迭代（每轮 1-3 个任务）
-Phase 3: 集成验证 → /ship → 部署
-```
-
-### 场景 5：技术选型
-
-```
-用户：状态管理用 Zustand 还是 Redux Toolkit？
-
-1. Researcher 使用 Context7 查询两个库的文档
-2. Researcher 对比分析（优缺点、适用场景、社区活跃度）
-3. Architect-Planner 基于项目需求给出建议
-4. 输出 research.md
-```
-
-### 场景 6：发布上线
-
-```
-用户：准备发布了，帮我检查一下
-
-1. 运行 /ship 命令
-2. 检查测试、安全、性能、配置、无障碍
-3. 输出检查报告（表格格式）
-4. 给出发布步骤
-```
+> 各级别的详细场景说明和操作指南见 [BEST-PRACTICES.md](BEST-PRACTICES.md#场景实战)。
 
 ---
 
@@ -882,7 +686,7 @@ Rules 文件放在 `.claude/rules/` 目录下，Claude Code 会根据文件名�
 - S/M/L/XL 任务分级
 - 技术栈规范（新增 Hono、Astro、Kysely、Turborepo）
 - 非功能需求清单（性能阈值、无障碍等级）
-- 5 个角色分工（原 7 个精简）
+- 6 个角色分工
 - 文档策略（按任务级别产出）
 
 ### .claude/settings.json
@@ -903,45 +707,4 @@ MCP 服务器配置（v2.0 精简为 5 个）：
 
 ## 更新日志
 
-### v2.0.0（2026-06-07）
-
-**架构级重构：从线性瀑布流到并行迭代模型**
-
-| 变化 | v1.x | v2.0 |
-|------|------|------|
-| 工作流 | 串行瀑布流 | 并行迭代模型 |
-| 任务分级 | 一刀切全流程 | S/M/L/XL 四级按需 |
-| Agent 数量 | 7 个（职责分散） | 5 个（合并精简） |
-| Skill 数量 | 18 个（重叠多） | 13 个（合并精简） |
-| 安全检查 | 仅 Write/Edit | + Bash 命令检查 |
-| MCP 服务器 | 6 个 | 5 个（去重 Puppeteer） |
-| 无障碍 | 无 | 审查维度 + 规则 |
-
-**详细变更**：
-- **工作流**：线性瀑布流 → 并行迭代模型，Review 在 Build 过程中持续进行
-- **任务分级**：新增 S/M/L/XL 四级，小任务跳过文档直接写代码
-- **Agent**：Planner + Architect 合并为 Architect-Planner；Security Auditor 合并入 Reviewer
-- **Skill**：frontend 合并 react-patterns + nextjs-mastery；code-review 合并 security-review；testing 合并 tdd + testing-strategies；api-design 合并 authentication-patterns
-- **技术栈**：新增 Hono（优先框架）、Astro、Kysely、Turborepo、Changesets、Edge Runtime
-- **安全 Hook**：新增 bash-check.sh（拦截危险命令）；security-check.sh 增加注释剥离、原型链污染检测
-- **无障碍**：react.md 规则增加 WCAG AA 要求；Reviewer 增加第 6 维度；/ship 增加无障碍检查
-- **Docker**：修复 Dockerfile（`npm prune --omit=dev`）；docker-compose 移除 version 字段
-- **CI/CD**：GitHub Actions 增加 matrix 测试、codecov、Docker layer cache
-- **非功能需求**：CLAUDE.md 新增性能阈值表（LCP < 2.5s, CLS < 0.1）
-
-### v1.1.0（2026-06-02）
-- 新增 8 个 Skill：ui-design、testing-strategies、react-patterns、nextjs-mastery、authentication-patterns、typescript-advanced、ci-cd-pipelines、microservices-design
-- 移除 PostToolUse 格式化提示 Hook（功能过弱，无实际价值）
-- 修复安全检查 Hook 逻辑 bug（`&&` → `||`）
-- 修复 PostgreSQL 连接字符串硬编码问题（改为 `${DATABASE_URL}`）
-- 新增 PostgreSQL 到 CLAUDE.md MCP 工具说明
-- 安装脚本和文档同步更新
-
-### v1.0.0（2026-06-02）
-- 初始版本
-- 7 个 Agent
-- 10 个 Skill
-- 6 个 MCP 服务器
-- 4 个 Slash Command
-- 5 个 Rules
-- 2 个 Hook
+详见 [CHANGELOG.md](CHANGELOG.md)。

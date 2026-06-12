@@ -1,6 +1,6 @@
 ---
 name: ci-cd-pipelines
-description: CI/CD pipeline patterns for GitHub Actions, GitLab CI, testing strategies, and deployment automation
+description: CI/CD 流水线和容器化部署，覆盖 GitHub Actions、GitLab CI、Docker、测试策略和部署自动化
 ---
 
 # CI/CD Pipelines
@@ -180,6 +180,59 @@ test:
       with:
         node-version: ${{ matrix.node }}
     - run: npm ci && npm test
+```
+
+## Docker
+
+### Dockerfile (multi-stage)
+
+```dockerfile
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build && npm prune --omit=dev
+
+FROM node:20-alpine AS production
+WORKDIR /app
+RUN addgroup -g 1001 -S nodejs && adduser -S app -u 1001
+COPY --from=builder --chown=app:nodejs /app/dist ./dist
+COPY --from=builder --chown=app:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=app:nodejs /app/package.json ./
+USER app
+EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=3s CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+CMD ["node", "dist/index.js"]
+```
+
+### docker-compose.yml
+
+```yaml
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    env_file: .env.db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
 ```
 
 ## Anti-Patterns

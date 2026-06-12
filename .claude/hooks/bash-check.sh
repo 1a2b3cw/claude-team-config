@@ -12,13 +12,13 @@ fi
 issues=0
 
 # 🔴 严重：不可逆破坏
-if echo "$command" | grep -qE 'rm\s+(-rf?|--recursive)\s+(/|~|\$HOME|\*)'; then
-  echo "🔴 [严重] 检测到递归删除根目录/主目录 - 拒绝执行"
+if echo "$command" | grep -qE 'rm\s+(-[rRf]+\s+|--recursive\s+.*--force|--force\s+.*--recursive)\s*(/|~|\$HOME|\*|\.\.?/?)(\s|$)'; then
+  echo "🔴 [严重] 检测到递归删除根目录/主目录/当前目录 - 拒绝执行"
   exit 2
 fi
 
-if echo "$command" | grep -qE 'git\s+push\s+.*--force'; then
-  echo "🔴 [严重] 检测到 force push - 请确认目标分支"
+if echo "$command" | grep -qE 'git\s+push\s+.*--force(?!-with-lease)'; then
+  echo "🔴 [严重] 检测到 force push - 请确认目标分支（如需安全 force push，请使用 --force-with-lease）"
   exit 2
 fi
 

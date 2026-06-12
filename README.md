@@ -12,12 +12,12 @@
 
 | 组件 | 数量 | 说明 |
 |------|------|------|
-| **Agent** | 5 个 | Architect-Planner、Builder、Reviewer、Researcher、DevOps |
-| **Skill** | 13 个 | 前端、后端、测试、安全、性能、UI 设计、TypeScript 进阶等 |
+| **Agent** | 6 个 | Architect-Planner、Builder、Designer、Reviewer、Researcher、DevOps |
+| **Skill** | 14 个 | 前端、后端、测试、安全、性能、UI 设计、UI 原型、TypeScript 进阶等 |
 | **MCP 服务器** | 5 个 | GitHub、Playwright、Context7、SQLite、PostgreSQL |
 | **Slash Command** | 4 个 | `/dev`、`/review-all`、`/ship`、`/standup` |
-| **Rules** | 5 个 | TypeScript、React、Node.js、测试、Git |
-| **Hook** | 3 个 | 代码安全检查、Bash 命令检查、任务追踪 |
+| **Rules** | 6 个 | TypeScript、React、Node.js、测试、Git、设计 |
+| **Hook** | 2 个 | 代码安全检查（Write/Edit）、Bash 命令检查 |
 
 ## 快速开始
 
@@ -44,14 +44,13 @@ cd 你的项目
 claude
 ```
 
-或使用安装脚本：
+或手动复制（推荐）：
 
 ```bash
-# Windows
-claude-team-config\install.bat 你的项目路径
-
-# Linux / Mac
-bash claude-team-config/install.sh 你的项目路径
+# 复制 .claude 配置目录到你的项目
+cp -r .claude /你的项目/.claude
+cp .gitignore /你的项目/.gitignore
+mkdir -p /你的项目/data
 ```
 
 ### 验证
@@ -105,13 +104,14 @@ S/M 级：直接写代码 → 自动审查 → 完成
 ├── CLAUDE.md              # 核心指令（工作流、技术栈、规范）
 ├── settings.json          # 权限配置、Hook 配置
 ├── .mcp.json              # MCP 服务器配置
-├── agents/                # 5 个 Agent 角色定义
+├── agents/                # 6 个 Agent 角色定义
 │   ├── architect-planner.md
 │   ├── builder.md
+│   ├── designer.md
 │   ├── reviewer.md
 │   ├── researcher.md
 │   └── devops.md
-├── skills/                # 13 个 Skill 技能定义
+├── skills/                # 14 个 Skill 技能定义
 │   ├── frontend/
 │   ├── api-design/
 │   ├── testing/
@@ -122,28 +122,17 @@ S/M 级：直接写代码 → 自动审查 → 完成
 │   ├── review-all.md
 │   ├── ship.md
 │   └── standup.md
-├── rules/                 # 5 个编码规范
+├── rules/                 # 6 个编码规范
 │   ├── typescript.md
 │   ├── react.md
 │   ├── node.md
 │   ├── testing.md
-│   └── git.md
-└── hooks/                 # 3 个安全钩子
+│   ├── git.md
+│   └── design.md
+└── hooks/                 # 2 个安全钩子
     ├── security-check.sh
     └── bash-check.sh
 ```
-
-## v2.0 核心变化
-
-| 维度 | v1.x | v2.0 |
-|------|------|------|
-| 工作流 | 串行瀑布流 | 并行迭代模型 |
-| 任务分级 | 一刀切全流程 | S/M/L/XL 四级按需 |
-| Agent | 7 个 | 5 个（合并精简） |
-| Skill | 18 个 | 13 个（合并精简） |
-| 安全检查 | 仅 Write/Edit | + Bash 命令检查 |
-| MCP 服务器 | 6 个 | 5 个（去重 Puppeteer） |
-| 无障碍 | 无 | 审查维度 + 规则 |
 
 ## 可选配置
 
@@ -203,6 +192,7 @@ description: 技能描述
 
 - [USAGE.md](USAGE.md) - 完整使用文档
 - [BEST-PRACTICES.md](BEST-PRACTICES.md) - 最佳实践指南（面向初学者）
+- [CHANGELOG.md](CHANGELOG.md) - 版本更新日志
 
 ## License
 

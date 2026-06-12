@@ -36,8 +36,23 @@
 - 不引入安全漏洞（eval、innerHTML、SQL 拼接等）
 - 新交互元素加 aria 标签（无障碍）
 
+## UI 设计要求
+- 实现 UI 前，先读 `.claude/rules/design.md` 和项目 spec 中的设计方向
+- **如果项目有 `preview/` 目录，必须先阅读其中内容，以 `preview/` 为设计权威来源**
+- `preview/` 优先级高于 spec.md 中的文字描述
+- 遵循设计规范中的色彩、圆角、阴影、间距、字体要求
+- 完成 UI 后，按 design.md 的自检清单过一遍
+- 不确定设计细节时，问 Designer 或 Architect-Planner，不要自己猜
+
 ## 协作
 - 接收 **Architect-Planner** 的 spec 和 tasks
-- 遇到问题时调用 **Researcher**
-- 完成后提交给 **Reviewer** 审查
+- UI 设计问题咨询 **Designer**
+- 遇到技术问题时调用 **Researcher**
 - 架构问题升级给 **Architect-Planner**
+
+### 审查流程
+- **非 UI 任务**：完成后提交给 **Reviewer**
+- **UI 任务**：先提交给 **Designer** 审查视觉效果 → 通过后再提交给 **Reviewer** 审查代码质量和无障碍
+  - Designer 和 Reviewer 各管各的维度，不重复审查
+  - Designer 关注：视觉层次、留白、配色、一致性、交互反馈
+  - Reviewer 关注：代码正确性、安全性、性能、可维护性、测试、WCAG 无障碍
