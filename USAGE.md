@@ -1,6 +1,6 @@
 # AI 全栈开发团队 使用文档
 
-> v2.0.0 | 2026-06-07
+> v2.0.1 | 2026-06-17
 
 ## 目录
 
@@ -26,7 +26,7 @@
 - **6 个 Agent**：Architect-Planner、Builder、Designer、Reviewer、Researcher、DevOps
 - **14 个 Skill**：前端、后端、测试、安全、性能、UI 设计、UI 原型、TypeScript 进阶等
 - **5 个 MCP 服务器**：GitHub、Playwright、Context7、SQLite、PostgreSQL
-- **4 个 Slash Command**：`/dev`、`/review-all`、`/ship`、`/standup`
+- **7 个 Slash Command**：`/dev`、`/check`、`/fix`、`/review-all`、`/ship`、`/standup`
 - **6 个 Rules**：TypeScript、React、Node.js、测试、Git、设计
 - **2 个 Hook**：代码安全检查（Write/Edit 时）、Bash 命令检查（执行命令时）
 
@@ -157,7 +157,9 @@ New-Item -ItemType Directory -Path D:\你的新项目\data -Force
 │   ├── agents/
 │   ├── skills/
 │   ├── commands/
-│   ├── rules/
+│   ├── rules/            # 精简版规则（必须遵守）
+│   ├── specs/            # 详细技术参考（按文件类型自动注入）
+│   ├── workspace/        # 会话记忆
 │   └── hooks/
 ├── .gitignore
 ├── data/                 # SQLite 数据库目录
@@ -393,32 +395,72 @@ rm -rf .claude/skills/microservices-design  # 不需要微服务
 
 ### /dev - 智能开发流程
 
-**用途**：根据任务复杂度自动选择流程
+**用途**：一句话需求进，可运行代码出。你只管确认，AI 管流程。
 
-**流程（v2.0）**：
-1. **评估复杂度** → 判断 S/M/L/XL 级别
-2. **Plan（L/XL）** → Architect-Planner 规划
-3. **迭代开发** → Builder 构建 + Reviewer 并行审查
-4. **验收** → 测试通过 + 用户确认
+**流程（v2.0.1）**：
+1. **Phase 0 需求确认** → AI 问你 3 个问题（解决什么问题、技术限制、验收标准）
+2. **Phase 1 复杂度判断** → S/M/L/XL 级别，决定规划深度
+3. **Phase 2 迭代开发** → Builder 构建 + 每个任务自动 /check + 最终 /review-all
+4. **Phase 3 验收** → 测试 + 类型检查 + Git 状态检查
+
+**异常路径**：测试失败自动修（最多 2 轮）、审查打回自动修、用户否决方案最多调整 3 轮
 
 **使用示例**：
 ```
 /dev 做一个用户注册登录功能
 /dev 实现一个 TODO 应用
 /dev 给现有项目添加文件上传功能
+/dev 修复登录页面输入空密码时没有提示的问题
+```
+
+### /check - 功能级快检
+
+**用途**：写完一个功能后立即执行的轻量检查，1 分钟内出结果
+
+**3 个维度**：
+- 逻辑正确性（返回值、条件分支、异步、错误处理）
+- 类型安全（any → unknown、类型标注、接口完整）
+- 边界条件（空值、零值、并发、特殊字符）
+
+**自动修复**：能自动修的直接修，需要判断的列出问题让你确认，最多 2 轮
+
+**使用示例**：
+```
+/check                              # 快检当前 git diff 中的变更
+/check src/auth/login.ts            # 快检指定文件
+/check src/features/auth/           # 快检指定目录
+```
+
+### /fix - 定点修复
+
+**用途**：指定文件或描述问题，AI 直接修，不走规划流程
+
+**流程**：理解问题 → 分析根因 → 修复 → 验证（测试 + 类型检查）→ 输出修复报告
+
+**原则**：一次只修一个问题，不顺手"优化"其他代码，能写测试就写测试
+
+**使用示例**：
+```
+/fix src/auth/login.ts 里的密码验证逻辑不对
+/fix 首页的标题字号太小了，改成 24px
+/fix 用户列表的分页在最后一页会报错
 ```
 
 ### /review-all - 多维度联合审查
 
-**用途**：Reviewer 一次完成所有维度审查（不再分安全/质量两轮）
+**用途**：合并前 / 上线前的全面审查，6 个维度一次完成，有问题自动修
 
 **6 个审查维度**：
-- 代码质量（正确性、可维护性）
-- 安全性（OWASP Top 10、依赖漏洞）
-- 性能（查询优化、前端性能）
-- 架构（模块划分、依赖关系）
-- 测试（覆盖度、边界条件）
+- 正确性（逻辑、边界、错误处理）
+- 安全性（OWASP Top 10、依赖漏洞、输入验证）
+- 性能（N+1 查询、重渲染、内存泄漏）
+- 可维护性（命名、职责、重复、复杂度）
+- 测试（覆盖率、边界条件、独立可重复）
 - 无障碍（WCAG AA、aria 标签、键盘操作）
+
+**默认范围**：不带参数时审查当前分支相对于 main 的所有变更
+
+**后续动作**：通过→可以合并；不通过→自动修→重审（最多 2 轮）；2 轮后仍不通过→列出问题等你决定
 
 **使用示例**：
 ```
@@ -520,19 +562,17 @@ rm -rf .claude/skills/microservices-design  # 不需要微服务
 
 **触发时机**：每次 Write/Edit 操作前
 
-**v2.0 改进**：自动剥离注释再检查，减少误报；增加原型链污染检测
+**v2.0.1 改进**：严重问题阻止操作（exit 2），中等问题仅警告（exit 0）；新增 INSERT/UPDATE/DELETE SQL 检测；不再跳过 .sh 文件
 
-| 严重程度 | 检查项 |
-|----------|--------|
-| 🔴 严重 | eval()、new Function() |
-| 🔴 严重 | innerHTML、dangerouslySetInnerHTML |
-| 🔴 严重 | os.system()、child_process.exec() |
-| 🔴 严重 | 原型链污染（`__proto__=`、`constructor[`） |
-| 🟡 中等 | 硬编码密钥/密码（8+ 字符） |
-| 🟡 中等 | SQL 字符串拼接 |
-| 🟡 中等 | JSON.parse() 接受不可信输入 |
-
-**行为**：发现安全问题时输出警告，由用户决定是否继续。
+| 严重程度 | 检查项 | 行为 |
+|----------|--------|------|
+| 🔴 严重 | eval()、new Function() | **阻止操作** |
+| 🔴 严重 | innerHTML、dangerouslySetInnerHTML | **阻止操作** |
+| 🔴 严重 | os.system()、child_process.exec() | **阻止操作** |
+| 🔴 严重 | 原型链污染（`__proto__=`、`constructor[`） | **阻止操作** |
+| 🟡 中等 | 硬编码密钥/密码（4+ 字符） | 仅警告 |
+| 🟡 中等 | SQL 字符串拼接（SELECT/INSERT/UPDATE/DELETE） | 仅警告 |
+| 🟡 中等 | JSON.parse() 接受不可信输入 | 仅警告 |
 
 ### Bash 命令检查 Hook（PreToolUse - Bash）🆕
 
@@ -626,14 +666,12 @@ mkdir -p data
 
 ### Q: 安全检查 Hook 太严格/太宽松怎么办？
 
-编辑 `.claude/settings.json` 中的 `hooks` 配置：
+**v2.0.1 行为**：严重问题（eval、innerHTML 等）阻止操作，中等问题（硬编码密钥、SQL 拼接等）仅警告。
 
-```json
-// 移除安全检查
-"PreToolUse": []
-
-// 或修改 .claude/hooks/security-check.sh 调整检查规则
-```
+如需调整：
+- 修改 `.claude/hooks/security-check.sh` 中的检查规则
+- 严重问题改为警告：将 `check_critical` 改为 `check_warning`
+- 移除安全检查：编辑 `.claude/settings.json`，清空 `PreToolUse` 数组
 
 ### Q: 如何禁用某个 MCP 服务器？
 
@@ -680,13 +718,16 @@ Rules 文件放在 `.claude/rules/` 目录下，Claude Code 会根据文件名�
 ## 配置文件说明
 
 ### .claude/CLAUDE.md
-核心指令文件（v2.0），定义了：
+核心指令文件（v2.0.1），定义了：
 - Karpathy 四原则 + 反馈尽早
 - 并行迭代工作流（替代旧的线性瀑布流）
 - S/M/L/XL 任务分级
 - 技术栈规范（新增 Hono、Astro、Kysely、Turborepo）
 - 非功能需求清单（性能阈值、无障碍等级）
 - 6 个角色分工
+- 异常路径（测试失败、审查打回、用户否决等 7 种场景）
+- 粒度速查（/dev → /check → /fix → /review-all → /standup）
+- 规范注入机制（rules/ 精简版 + specs/ 详细版自动注入）
 - 文档策略（按任务级别产出）
 
 ### .claude/settings.json
