@@ -17,8 +17,9 @@
 | **MCP 服务器** | 5 个 | GitHub、Playwright、Context7、SQLite、PostgreSQL |
 | **Slash Command** | 7 个 | `/dev`、`/check`、`/fix`、`/review-all`、`/ship`、`/standup` |
 | **Rules** | 6 个 | TypeScript、React、Node.js、测试、Git、设计 |
-| **Specs** | 4 个 | 按文件类型自动注入的详细技术参考 |
+| **Specs** | 4 个 | 详细技术参考（AI 按需读取） |
 | **Hook** | 2 个 | 代码安全检查（Write/Edit）、Bash 命令检查 |
+| **CLI 工具** | 1 个 | `npx create-claude-team init` 一行命令初始化 |
 
 ## 快速开始
 
@@ -29,29 +30,28 @@
 - **Git** 2.30+
 - **Claude Code** 最新版
 
-### 安装
+### 安装（推荐）
 
 ```bash
-# 克隆仓库
-git clone https://github.com/你的用户名/claude-team-config.git
+# 进入你的项目目录
+cd your-project
 
-# 复制配置到你的项目
-cp -r claude-team-config/.claude 你的项目/.claude
-cp claude-team-config/.gitignore 你的项目/.gitignore
-mkdir -p 你的项目/data
-
-# 进入项目，启动 Claude Code
-cd 你的项目
-claude
+# 一行命令初始化
+npx create-claude-team init
 ```
 
-或手动复制（推荐）：
+### 安装（手动）
 
 ```bash
-# 复制 .claude 配置目录到你的项目
-cp -r .claude /你的项目/.claude
-cp .gitignore /你的项目/.gitignore
-mkdir -p /你的项目/data
+git clone https://github.com/你的用户名/claude-team-config.git
+cp -r claude-team-config/.claude your-project/.claude
+```
+
+### 更新配置
+
+```bash
+# 更新到最新版（保留你的 settings.json 和 workspace）
+npx create-claude-team update
 ```
 
 ### 验证
@@ -100,7 +100,7 @@ S 级：直接写代码 → 完成
 | **粗** | `/dev 做一个用户登录` | 走完全流程，你只管确认 |
 | **中** | `/check` | 快检当前代码，1 分钟出结果 |
 | **细** | `/fix 这个函数返回值类型不对` | 直接改这一处，不走流程 |
-| **审查** | `/review-all src/auth/` | 6 维度全面审查，自动修 |
+| **审查** | `/review-all src/auth/` | 跨文件审查（变更完整性+一致性+历史回归+依赖关系），自动修 |
 
 ### 不用斜杠命令也行
 
@@ -136,7 +136,7 @@ S 级：直接写代码 → 完成
 │   ├── dev.md             # 完整开发流程（含需求确认 + 异常路径）
 │   ├── check.md           # 功能级快检（3 维度，1 分钟）
 │   ├── fix.md             # 定点修复（不走流程）
-│   ├── review-all.md      # 多维度联合审查（6 维度，自动修）
+│   ├── review-all.md      # 跨文件审查（变更完整性+一致性+历史回归+依赖关系）
 │   ├── ship.md            # 发布前检查
 │   └── standup.md         # 项目状态汇报
 ├── rules/                 # 6 个编码规则（精简版，必须遵守）
@@ -146,7 +146,7 @@ S 级：直接写代码 → 完成
 │   ├── testing.md
 │   ├── git.md
 │   └── design.md
-├── specs/                 # 4 个详细技术参考（按文件类型自动注入）
+├── specs/                 # 4 个详细技术参考（AI 按需读取）
 │   ├── typescript.md
 │   ├── react.md
 │   ├── node.md

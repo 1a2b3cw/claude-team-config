@@ -1,5 +1,24 @@
 # 更新日志
 
+## v2.0.2（2026-06-17）
+
+**审查体系重构 + CLI 分发工具**
+
+### 新增
+- **`create-claude-team` CLI 工具**：`npx create-claude-team init` 一行命令初始化，`npx create-claude-team update` 更新配置
+- **code-review skill 增强**：每个维度加具体检查方法（怎么查）和代码示例（常见问题），聚焦单文件审查
+
+### 重构
+- **`/review-all` 命令**：从"6 维度逐文件审查"改为"跨文件审查"（变更完整性 + 跨文件一致性 + 历史回归 + 依赖关系），不再重复 code-review skill 的工作
+- **Reviewer agent**：明确两层审查职责——单文件用 code-review skill（6 维度），跨文件用 /review-all（4 维度）
+
+### 修复
+- **specs/ 定位修正**：specs/ 无自动注入机制，核心内容已合并回 rules/，specs/ 改为"AI 按需读取的详细技术参考"
+- **所有 agent 升级**：builder/reviewer/researcher/designer/architect-planner 加入 journal.md 引用、异常路径表、metrics 追踪
+- **bash-check.sh 增强**：新增 git checkout --.、npm publish、dd/mkfs/fdisk、shutdown 等危险命令检查
+- **ship.md 重写**：集成 /review-all、DevOps 参与、回滚检查、异常路径
+- **删除虚构的 /review 命令引用**：dev.md、fix.md 中引用了不存在的 /review，已修正
+
 ## v2.0.1（2026-06-17）
 
 **核心工作流重构：解决 3 个用户痛点**
