@@ -2,7 +2,7 @@
 
 基于 Claude Code 的 AI 协作开发团队配置，专为 Web 全栈开发设计。
 
-> v2.0.1 | 2026-06-17
+> v2.0.2 | 2026-06-17
 
 ## 一句话
 
@@ -15,7 +15,7 @@
 | **Agent** | 6 个 | Architect-Planner、Builder、Designer、Reviewer、Researcher、DevOps |
 | **Skill** | 14 个 | 前端、后端、测试、安全、性能、UI 设计、UI 原型、TypeScript 进阶等 |
 | **MCP 服务器** | 5 个 | GitHub、Playwright、Context7、SQLite、PostgreSQL |
-| **Slash Command** | 7 个 | `/dev`、`/check`、`/fix`、`/review-all`、`/ship`、`/standup` |
+| **Slash Command** | 6 个 | `/dev`、`/check`、`/fix`、`/review-all`、`/ship`、`/standup` |
 | **Rules** | 6 个 | TypeScript、React、Node.js、测试、Git、设计 |
 | **Specs** | 4 个 | 详细技术参考（AI 按需读取） |
 | **Hook** | 2 个 | 代码安全检查（Write/Edit）、Bash 命令检查 |
@@ -66,7 +66,7 @@ npx create-claude-team update
 
 ## 怎么用
 
-### 7 个核心命令
+### 6 个核心命令
 
 | 命令 | 什么时候用 | 例子 |
 |------|-----------|------|
@@ -132,7 +132,7 @@ S 级：直接写代码 → 完成
 │   ├── testing/
 │   ├── code-review/
 │   └── ...
-├── commands/              # 7 个斜杠命令
+├── commands/              # 6 个斜杠命令
 │   ├── dev.md             # 完整开发流程（含需求确认 + 异常路径）
 │   ├── check.md           # 功能级快检（3 维度，1 分钟）
 │   ├── fix.md             # 定点修复（不走流程）

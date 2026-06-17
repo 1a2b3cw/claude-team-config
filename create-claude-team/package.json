@@ -1,6 +1,6 @@
 {
   "name": "create-claude-team",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "AI 全栈开发团队配置 — 一行命令初始化 Claude Code 团队配置",
   "keywords": ["claude", "claude-code", "ai-team", "scaffolding", "boilerplate"],
   "homepage": "https://github.com/你的用户名/claude-team-config",
@@ -9,7 +9,7 @@
   "author": "张家豪",
   "type": "module",
   "bin": {
-    "claude-team": "./cli.js"
+    "claude-team": "cli.js"
   },
   "files": [
     "cli.js",

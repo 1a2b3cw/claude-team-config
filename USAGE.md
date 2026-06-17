@@ -1,6 +1,6 @@
 # AI 全栈开发团队 使用文档
 
-> v2.0.1 | 2026-06-17
+> v2.0.2 | 2026-06-17
 
 ## 目录
 
@@ -26,7 +26,7 @@
 - **6 个 Agent**：Architect-Planner、Builder、Designer、Reviewer、Researcher、DevOps
 - **14 个 Skill**：前端、后端、测试、安全、性能、UI 设计、UI 原型、TypeScript 进阶等
 - **5 个 MCP 服务器**：GitHub、Playwright、Context7、SQLite、PostgreSQL
-- **7 个 Slash Command**：`/dev`、`/check`、`/fix`、`/review-all`、`/ship`、`/standup`
+- **6 个 Slash Command**：`/dev`、`/check`、`/fix`、`/review-all`、`/ship`、`/standup`
 - **6 个 Rules**：TypeScript、React、Node.js、测试、Git、设计
 - **2 个 Hook**：代码安全检查（Write/Edit 时）、Bash 命令检查（执行命令时）
 
@@ -127,9 +127,22 @@ claude
 
 ## 在其他项目中使用
 
-本团队配置可以复用到任意项目中，有 2 种方式：
+本团队配置可以复用到任意项目中，有 3 种方式：
 
-### 方式 1：手动复制（推荐）
+### 方式 1：CLI 工具（推荐）
+
+```bash
+# 进入你的项目目录
+cd your-project
+
+# 一行命令初始化
+npx create-claude-team init
+
+# 后续更新配置（保留你的 settings.json 和 workspace）
+npx create-claude-team update
+```
+
+### 方式 2：手动复制
 
 ```bash
 # 复制整个 .claude 目录和 .gitignore
@@ -158,7 +171,7 @@ New-Item -ItemType Directory -Path D:\你的新项目\data -Force
 │   ├── skills/
 │   ├── commands/
 │   ├── rules/            # 精简版规则（必须遵守）
-│   ├── specs/            # 详细技术参考（按文件类型自动注入）
+│   ├── specs/            # 详细技术参考（AI 按需读取）
 │   ├── workspace/        # 会话记忆
 │   └── hooks/
 ├── .gitignore
@@ -166,7 +179,7 @@ New-Item -ItemType Directory -Path D:\你的新项目\data -Force
 └── src/                  # 你的项目代码
 ```
 
-### 方式 2：Git 子模块（适合团队协作）
+### 方式 3：Git 子模块（适合团队协作）
 
 把团队配置做成独立仓库，各项目通过 submodule 引用，统一更新。
 
@@ -192,14 +205,14 @@ ln -s .claude-team/.claude .claude
 git submodule update --remote
 ```
 
-### 两种方式对比
+### 三种方式对比
 
-| 维度 | 手动复制 | Git 子模块 |
-|------|----------|------------|
-| **难度** | 最简单 | 中等 |
-| **更新方式** | 手动覆盖 | `git submodule update` |
-| **版本管理** | 无 | 有（独立版本库） |
-| **团队协作** | 不适合 | 最适合 |
+| 维度 | CLI 工具 | 手动复制 | Git 子模块 |
+|------|----------|----------|------------|
+| **难度** | 最简单 | 简单 | 中等 |
+| **更新方式** | `npx create-claude-team update` | 手动覆盖 | `git submodule update` |
+| **版本管理** | 有（npm 版本） | 无 | 有（独立版本库） |
+| **团队协作** | 适合 | 不适合 | 最适合 |
 
 ### 针对不同项目类型的调整
 
@@ -300,7 +313,8 @@ rm -rf .claude/skills/microservices-design  # 不需要微服务
                   ↓
 ┌─────────────────────────────────────────────────┐
 │  Reviewer（审查员）                               │
-│  - 代码审查 + 安全检查 + 性能 + 无障碍（6 维度）    │
+│  - 两层审查：code-review skill 单文件（6 维度）     │
+│    + /review-all 跨文件（4 维度）                   │
 │  - 合并了原 Security Auditor 职责                  │
 │  - 产出：review-report.md                         │
 │  - 参与：M 及以上任务                              │
@@ -446,17 +460,22 @@ rm -rf .claude/skills/microservices-design  # 不需要微服务
 /fix 用户列表的分页在最后一页会报错
 ```
 
-### /review-all - 多维度联合审查
+### /review-all - 跨文件联合审查
 
-**用途**：合并前 / 上线前的全面审查，6 个维度一次完成，有问题自动修
+**用途**：合并前/上线前的全面审查。聚焦**文件之间的关系**，单文件质量由 code-review skill 负责。
 
-**6 个审查维度**：
-- 正确性（逻辑、边界、错误处理）
-- 安全性（OWASP Top 10、依赖漏洞、输入验证）
-- 性能（N+1 查询、重渲染、内存泄漏）
-- 可维护性（命名、职责、重复、复杂度）
-- 测试（覆盖率、边界条件、独立可重复）
-- 无障碍（WCAG AA、aria 标签、键盘操作）
+**和 /check、code-review 的关系**：
+| 组件 | 职责 | 范围 | 耗时 |
+|------|------|------|------|
+| /check | 快速查错 | 当前变更的文件，3 个维度 | < 1 分钟 |
+| code-review skill | 单文件深度审查 | 1 个文件，6 个维度 | 逐文件 |
+| /review-all | 跨文件分析 | 分支级，文件间关系 | 3-5 分钟 |
+
+**4 个跨文件分析维度**：
+- 变更完整性（改了接口/类型/配置，所有引用方都同步了吗？）
+- 跨文件一致性（同类功能在不同文件中是否用了相同的模式？）
+- 历史回归（这个模块之前被打回过？上次的问题这次修了吗？）
+- 依赖关系（新增/删除/升级了依赖，相关配置都同步了吗？）
 
 **默认范围**：不带参数时审查当前分支相对于 main 的所有变更
 
@@ -464,9 +483,8 @@ rm -rf .claude/skills/microservices-design  # 不需要微服务
 
 **使用示例**：
 ```
-/review-all src/features/auth/
-/review-all 最近的变更
-/review-all
+/review-all                        # 审查当前分支所有变更
+/review-all src/features/auth/     # 审查指定目录
 ```
 
 ### /ship - 发布前检查
@@ -580,15 +598,22 @@ rm -rf .claude/skills/microservices-design  # 不需要微服务
 
 **拦截（exit 2）**：
 - `rm -rf /`、`rm -rf ~`、`rm -rf $HOME`
-- `git push --force`（到 main/master）
+- `git push --force`（到 main/master，不包括 --force-with-lease）
 - `git reset --hard`
 - `git clean -f`
+- `git checkout -- .`（丢弃所有未提交更改）
+- `npm publish`（发布包到 npm）
+- `dd`、`mkfs`、`fdisk`（磁盘操作）
+- `shutdown`、`reboot`、`halt`、`poweroff`（系统关机）
 
 **警告（exit 0）**：
-- `curl | bash`（远程脚本执行）
+- `curl | bash` / `wget | bash`（远程脚本执行）
 - `chmod 777`
 - `docker --privileged`
 - `eval` 命令
+- `sudo` 命令
+- `rm .env`（删除环境变量文件）
+- 敏感环境变量赋值（GITHUB_TOKEN、NPM_TOKEN 等）
 
 ### 任务追踪 Hook（Stop）
 
@@ -727,7 +752,7 @@ Rules 文件放在 `.claude/rules/` 目录下，Claude Code 会根据文件名�
 - 6 个角色分工
 - 异常路径（测试失败、审查打回、用户否决等 7 种场景）
 - 粒度速查（/dev → /check → /fix → /review-all → /standup）
-- 规范注入机制（rules/ 精简版 + specs/ 详细版自动注入）
+- 规范注入机制（rules/ 始终加载 + specs/ AI 按需读取 + workspace/ 会话记忆）
 - 文档策略（按任务级别产出）
 
 ### .claude/settings.json
