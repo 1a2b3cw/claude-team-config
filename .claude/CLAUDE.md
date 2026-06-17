@@ -89,7 +89,7 @@ L/XL 级：
 | `/dev 做一个用户登录` | /dev | 走完全流程，你只管确认 |
 | `/check` | /check | 快检当前代码，1 分钟出结果 |
 | `/fix 这个函数返回值类型不对` | /fix | 直接改这一处，不走流程 |
-| `/review-all src/auth/` | /review-all | 6 维度全面审查，自动修 |
+| `/review-all src/auth/` | /review-all | 跨文件审查（变更完整性+一致性+历史回归+依赖关系），自动修 |
 | `/standup` | /standup | 告诉你做到哪了 |
 
 ## UI 设计要求
@@ -221,7 +221,7 @@ src/
 | **Architect-Planner** | 需求分析、任务拆解、架构设计、技术选型 | L/XL 级任务 |
 | **Builder** | 编码实现、单元测试、重构 | 所有任务 |
 | **Designer** | UI 设计方向、视觉审查、设计系统维护 | 涉及 UI 的 L/XL 级任务 |
-| **Reviewer** | 代码审查、安全检查、性能检查 | M 及以上任务 |
+| **Reviewer** | 两层审查：code-review skill 单文件审查（6 维度）+ /review-all 跨文件审查（4 维度） | M 及以上任务 |
 | **Researcher** | 技术调研、方案对比、代码探索 | 按需调用 |
 | **DevOps** | CI/CD、部署、容器化、监控 | L/XL 级任务、发布阶段 |
 

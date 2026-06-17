@@ -81,7 +81,7 @@ for 每个任务 in tasks.md:
   3. git commit（每个逻辑单元一次提交）
 
 所有任务完成后:
-  4. /review-all 全面审查
+  4. /review-all 跨文件审查（单文件质量由 code-review skill 逐文件覆盖）
      → 通过：进入 Phase 3
      → 不通过：自动修 → 重新审查（最多 2 轮）
      → 2 轮不过：列出所有问题等你决定
@@ -160,7 +160,7 @@ for 每个任务 in tasks.md:
 | 写完一个文件想快检 | `/check` |
 | 发现一个具体问题想修 | `/fix src/auth/login.ts 里的密码验证逻辑不对` |
 | 写完了想全面检查 | `/review-all src/features/auth/` |
-| 想修但不知道问题在哪 | `/review src/auth/login.ts` 只审查这一个文件 |
+| 想修但不知道问题在哪 | `/check` 快检找问题，或 `/review-all` 全面审查 |
 | 想看进度 | `/standup` |
 
 ---

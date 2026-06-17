@@ -106,10 +106,10 @@
 
 | 阶段 | 角色 | 职责 |
 |------|------|------|
-| 集成验证 | Reviewer | 运行 /review-all，确保代码质量 |
-| 安全审计 | Reviewer | 检查安全漏洞和敏感信息 |
-| 性能验证 | Reviewer | 检查性能指标 |
-| 无障碍检查 | Reviewer | 检查 WCAG 合规 |
+| 集成验证 | Reviewer | 运行 /review-all（含 code-review skill 逐文件审查），确保代码质量 |
+| 安全审计 | Reviewer | code-review skill 安全维度 + /review-all 跨文件安全检查 |
+| 性能验证 | Reviewer | code-review skill 性能维度覆盖 |
+| 无障碍检查 | Reviewer | code-review skill 无障碍维度覆盖 |
 | 配置检查 | DevOps | 环境变量、迁移、CI/CD |
 | 部署 | DevOps | 执行部署、验证、回滚准备 |
 | 最终决策 | 用户 | 确认是否发布 |
