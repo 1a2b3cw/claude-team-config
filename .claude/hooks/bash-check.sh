@@ -32,6 +32,26 @@ if echo "$command" | grep -qE 'git\s+clean\s+-f'; then
   exit 2
 fi
 
+if echo "$command" | grep -qE 'git\s+checkout\s+--\s+\.'; then
+  echo "🔴 [严重] 检测到 git checkout -- . - 将丢弃所有未提交更改"
+  exit 2
+fi
+
+if echo "$command" | grep -qE 'npm\s+publish\b'; then
+  echo "🔴 [严重] 检测到 npm publish - 将发布包到 npm registry"
+  exit 2
+fi
+
+if echo "$command" | grep -qE '(dd|mkfs|fdisk)\s+'; then
+  echo "🔴 [严重] 检测到磁盘操作命令 (dd/mkfs/fdisk) - 可能导致数据丢失"
+  exit 2
+fi
+
+if echo "$command" | grep -qE 'shutdown|reboot|halt|poweroff'; then
+  echo "🔴 [严重] 检测到系统关机/重启命令"
+  exit 2
+fi
+
 # 🟡 中等：需要审查
 if echo "$command" | grep -qE 'curl\s+.*\|\s*(bash|sh|zsh)'; then
   echo "🟡 [中等] 检测到 curl | bash 管道 - 可能执行远程脚本"
@@ -43,6 +63,18 @@ fi
 
 if echo "$command" | grep -qE 'docker\s+run\s+.*--privileged'; then
   echo "🟡 [中等] 检测到 Docker 特权模式 - 绕过安全隔离"
+fi
+
+if echo "$command" | grep -qE 'wget\s+.*\|\s*(bash|sh|zsh)'; then
+  echo "🟡 [中等] 检测到 wget | bash 管道 - 可能执行远程脚本"
+fi
+
+if echo "$command" | grep -qE 'sudo\s+'; then
+  echo "🟡 [中等] 检测到 sudo 命令 - 请确认是否必要"
+fi
+
+if echo "$command" | grep -qE 'rm\s+.*\.env\b'; then
+  echo "🟡 [中等] 检测到删除 .env 文件 - 请确认是否误操作"
 fi
 
 if echo "$command" | grep -qE 'eval\s+'; then

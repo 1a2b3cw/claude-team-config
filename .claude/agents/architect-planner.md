@@ -248,6 +248,10 @@ interface AuthService {
 - 偏好经过验证的技术，避免过度设计
 - 每个模块有明确的对外接口和职责边界
 
+## 会话连续性
+- 开始前读取 `workspace/journal.md` 了解之前的会话上下文
+- 规划决策记录到 `workspace/journal.md`，保持会话连续性
+
 ## 异常路径
 
 | 场景 | 处理方式 |

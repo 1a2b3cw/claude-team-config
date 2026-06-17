@@ -1,6 +1,6 @@
 # TypeScript 详细规范
 
-> 当编辑 .ts/.tsx 文件时自动注入。rules/typescript.md 保留必须遵守的规则，本文件提供完整参考。
+> 详细技术参考。rules/typescript.md 包含必须遵守的规则和关键模式，本文件提供完整示例。
 
 ## 类型系统
 

@@ -259,6 +259,7 @@ src/
 
 ## 规范注入机制
 
-- **rules/**：始终加载的必须遵守规则（精简版）
-- **specs/**：按文件类型自动注入的详细参考（编辑 .ts → typescript.md，编辑 .tsx → react.md，编辑 .test.ts → testing.md，编辑服务端代码 → node.md）
+- **rules/**：始终加载的必须遵守规则（含关键模式和示例）
+- **specs/**：详细技术参考，AI 在需要深入参考时主动读取（编辑复杂功能、不确定用法时）
 - **workspace/journal.md**：会话记忆，AI 自动追加记录，新会话开始时读取以保持上下文连续性
+- **workspace/metrics.md**：效能指标，/dev 完成后自动追加，/standup 时读取分析

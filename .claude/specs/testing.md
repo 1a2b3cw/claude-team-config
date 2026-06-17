@@ -1,6 +1,6 @@
 # 测试详细规范
 
-> 当编辑 .test.ts/.spec.ts 文件时自动注入。rules/testing.md 保留必须遵守的规则，本文件提供完整参考。
+> 详细技术参考。rules/testing.md 包含必须遵守的规则和关键模式，本文件提供完整示例。
 
 ## Vitest 配置
 
