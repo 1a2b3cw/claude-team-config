@@ -1,6 +1,6 @@
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 import { existsSync } from 'node:fs';
-import { readdir, rm, mkdir } from 'node:fs/promises';
+import { rm, copyFile } from 'node:fs/promises';
 import { copyDir, countFiles, findSourceDir } from './copy.js';
 
 // These directories are safe to overwrite during update
@@ -92,19 +92,26 @@ export async function update({ dryRun = false }) {
     await copyDir(src, dest);
   }
 
-  // Update files
+  // Update files — backup before overwrite
   for (const fileName of UPDATABLE_FILES) {
     const src = join(sourceDir, fileName);
     const dest = join(targetDir, fileName);
 
     if (!existsSync(src)) continue;
 
-    const { copyFile } = await import('node:fs/promises');
+    // Backup existing file so user doesn't lose customizations
+    if (existsSync(dest)) {
+      const backupPath = `${dest}.bak`;
+      await copyFile(dest, backupPath);
+      console.log(`  备份 ${fileName} → ${fileName}.bak`);
+    }
+
     await copyFile(src, dest);
     totalFiles++;
     console.log(`  更新 ${fileName}`);
   }
 
   console.log(`\n  \x1b[32m✓ 更新完成\x1b[0m — ${totalFiles} 个文件已更新`);
-  console.log(`  保留不变: ${PRESERVED.join(', ')}\n`);
+  console.log(`  保留不变: ${PRESERVED.join(', ')}`);
+  console.log(`  如有自定义修改被覆盖，可从 .bak 文件恢复\n`);
 }

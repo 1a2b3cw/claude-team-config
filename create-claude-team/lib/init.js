@@ -1,5 +1,6 @@
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 import { existsSync } from 'node:fs';
+import { rm, mkdir, writeFile } from 'node:fs/promises';
 import { copyDir, dirHasContent, countFiles, findSourceDir } from './copy.js';
 
 export async function init({ force = false, dryRun = false }) {
@@ -43,7 +44,6 @@ export async function init({ force = false, dryRun = false }) {
   // Clean target if force
   if (targetExists && force) {
     console.log(`\n  清理已有 .claude/ ...`);
-    const { rm } = await import('node:fs/promises');
     await rm(targetDir, { recursive: true, force: true });
   }
 
@@ -56,7 +56,6 @@ export async function init({ force = false, dryRun = false }) {
   // Create workspace if not exists
   const workspaceDir = join(targetDir, 'workspace');
   if (!existsSync(workspaceDir)) {
-    const { mkdir, writeFile } = await import('node:fs/promises');
     await mkdir(workspaceDir, { recursive: true });
     await writeFile(
       join(workspaceDir, 'journal.md'),
